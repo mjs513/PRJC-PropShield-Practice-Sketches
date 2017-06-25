@@ -27,8 +27,8 @@ You will need the Teensy Audio,SD, SerialFlash libraries to run the audio sketch
       #include <play_sd_wav.h>
       #include <play_sd_raw.h>
 ```
-
     b. In general to use SerialFlash, SD, Audio together the following lines should be included before headers in (a).
+    
 ```c++
       #include <Audio.h>
       #include <Wire.h>
