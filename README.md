@@ -1,4 +1,3 @@
-
 # PRJC-PropShield-Practice-Sketches
 Repository of PropShield Sketchs
 
@@ -57,5 +56,54 @@ Using the playWav output component connect the two channels with a patchcord to 
 ```
 Note: you have to add the line #include <play_sd_wav.h> after the SerialFlash library.
 
+Next, in Setup you need to set audiomemory, turn on the amplifier, set the mixer and optionally set the analogreference to external to make it louder.  So in the end your setup looks like:
+```c++
+void setup() {
+  AudioMemory(20); //4
+  dac0.analogReference(EXTERNAL);  //plays really loud, may get hissing
+                              //if your speakers can't handle it.
 
-    
+  //Set volume
+  mixer1.gain(0, 0.5);
+  mixer1.gain(1, 0.5);
+
+  delay(2000);
+
+  // Start SD Card
+  if (!(SD.begin(BUILTIN_SDCARD))) {
+    // stop here, but print a message repetitively
+    while (1) {
+      Serial.println("Unable to access the SD card");
+      delay(500);
+    }
+  }
+
+  //Start Amplifier
+  pinMode(PROP_AMP_ENABLE , OUTPUT);
+  digitalWrite(PROP_AMP_ENABLE , HIGH); 
+}
+```
+In the loop you open the file or files and play the file.
+```c++
+void playFile(const char *filename)
+{
+
+  File ff = SD.open(filename);
+  Serial.print("Playing file: ");
+  Serial.println(filename);  
+  
+  // Start playing the file.  This sketch continues to
+  // run while the file plays.
+  playMp31.play(filename);
+
+  // Simply wait for the file to finish playing.
+  while (playMp31.isPlaying()) { yield(); }
+}
+
+
+void loop() {
+  playFile("odd1.mp3");
+  delay(1000);
+}
+
+```
