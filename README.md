@@ -1,3 +1,4 @@
+
 # PRJC-PropShield-Practice-Sketches
 Repository of PropShield Sketchs
 
@@ -19,13 +20,15 @@ You will need the Teensy Audio,SD, SerialFlash libraries to run the audio sketch
       delay(10);             // allow time to wake up
 ```
 3. Go through the [Audio Library tutorial](https://www.pjrc.com/teensy/td_libs_Audio.html) and learn to use their [Audio Design Tool](https://www.pjrc.com/teensy/gui/index.html) if would definitely help.
-  a.  To play mp3, wav or raw files you need to include one of the following lines in the header of sketch:
+
+    a.  To play mp3, wav or raw files you need to include one of the following lines in the header of sketch:
 ```c++
       #include <play_sd_mp3.h>
       #include <play_sd_wav.h>
       #include <play_sd_raw.h>
 ```
-  b. In general to use SerialFlash, SD, Audio together the following lines should be included before headers in (a).
+
+    b. In general to use SerialFlash, SD, Audio together the following lines should be included before headers in (a).
 ```c++
       #include <Audio.h>
       #include <Wire.h>
