@@ -28,7 +28,6 @@ You will need the Teensy Audio,SD, SerialFlash libraries to run the audio sketch
       #include <play_sd_raw.h>
 ```
     b. In general to use SerialFlash, SD, Audio together the following lines should be included before headers in (a).
-    
 ```c++
       #include <Audio.h>
       #include <Wire.h>
@@ -36,3 +35,27 @@ You will need the Teensy Audio,SD, SerialFlash libraries to run the audio sketch
       #include <SD.h>
       #include <SerialFlash.h>
 ```
+
+The next piece is to establish the a connection between the audio components to get the sounds out.  That's where the design tool comes in and the audio training available.  But anyway by way of example:
+
+Using the playWav output component connect the two channels with a patchcord to a mixer which then goes to the dac.  This is shown in Image 1 in the docs directory. When you select each component it explains what it means and available options.  When you click on Export on the top of the screen the following code is automatically generated for you:
+```c++
+    #include <Audio.h>
+    #include <Wire.h>
+    #include <SPI.h>
+    #include <SD.h>
+    #include <SerialFlash.h>
+
+    // GUItool: begin automatically generated code
+    AudioPlaySdWav           playSdWav1;     //xy=86,114
+    AudioMixer4              mixer1;         //xy=297,166
+    AudioOutputAnalog        dac1;           //xy=447,185
+    AudioConnection          patchCord1(playSdWav1, 0, mixer1, 0);
+    AudioConnection          patchCord2(playSdWav1, 1, mixer1, 1);
+    AudioConnection          patchCord3(mixer1, dac1);
+    // GUItool: end automatically generated code
+```
+Note: you have to add the line #include <play_sd_wav.h> after the SerialFlash library.
+
+
+    
