@@ -20,7 +20,8 @@ You will need the Teensy Audio,SD, SerialFlash libraries to run the audio sketch
       #include <play_sd_wav.h>
       #include <play_sd_raw.h>
 ```
-    b. In general to use SerialFlash, SD, Audio together the following lines should be included before headers in (a).
+
+b. In general to use SerialFlash, SD, Audio together the following lines should be included before headers in (a).
 ```c++
       #include <Audio.h>
       #include <Wire.h>
@@ -54,7 +55,8 @@ in the docs directory. When you select each component it explains what it means 
     AudioConnection          patchCord3(mixer1, dac1);
     // GUItool: end automatically generated code
 ```
-Note: you have to add the line #include <play_sd_wav.h> after the SerialFlash library.
+Note 1: you have to add the line #include <play_sd_wav.h> after the SerialFlash library.
+Note 2: dac1, dac0 and analogOutput all work.
 
 Next, in Setup you need to set audiomemory, turn on the amplifier, set the mixer and optionally set the analogreference to external to make it louder.  So in the end your setup looks like:
 ```c++
