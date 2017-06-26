@@ -31,7 +31,13 @@ You will need the Teensy Audio,SD, SerialFlash libraries to run the audio sketch
 
 The next piece is to establish the a connection between the audio components to get the sounds out.  That's where the design tool comes in and the audio training available.  But anyway by way of example:
 
-Using the playWav output component connect the two channels with a patchcord to a mixer which then goes to the dac.  This is shown in Image 1 ![Image 1]https://github.com/mjs513/PRJC-PropShield-Practice-Sketches/blob/master/docs/PlayWavDesign.PNG?raw=true "Title") in the docs directory. When you select each component it explains what it means and available options.  When you click on Export on the top of the screen the following code is automatically generated for you.  More information on the AudioConnection object on PRJC website, https://www.pjrc.com/teensy/td_libs_AudioConnection.html
+Using the playWav output component connect the two channels with a patchcord to a mixer which then goes to the dac.  This is shown in the following image:  
+<p align="center">
+  <img src="https://github.com/mjs513/PRJC-PropShield-Practice-Sketches/blob/master/docs/PlayWavDesign.PNG" width="350"/>
+</p>
+
+in the docs directory. When you select each component it explains what it means and available options.  When you click on Export on the top of the screen the following code is automatically generated for you.  More information on the AudioConnection object on PRJC website, https://www.pjrc.com/teensy/td_libs_AudioConnection.html
+
 ```c++
     #include <Audio.h>
     #include <Wire.h>
