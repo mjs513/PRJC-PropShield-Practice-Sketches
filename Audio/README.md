@@ -55,7 +55,7 @@ in the docs directory. When you select each component it explains what it means 
     AudioConnection          patchCord3(mixer1, dac1);
     // GUItool: end automatically generated code
 ```
-Note 1: you have to add the line #include <play_sd_wav.h> after the SerialFlash library.
+Note 1: While you do not have to do an #include <play_sd_wav.h> after the SerialFlash library it seems you do have to do an #include <play_sd_mp3.h>.
 Note 2: dac1, dac0 and analogOutput all work.
 
 Next, in Setup you need to set audiomemory, turn on the amplifier, set the mixer and optionally set the analogreference to external to make it louder.  So in the end your setup looks like:
