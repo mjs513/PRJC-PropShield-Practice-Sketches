@@ -27,3 +27,4 @@ TODO:
 2. Add Tilt Compensation for the heading
 3. Add EEPROM support
 4. Add/modify filter parameters and check filters to match FreeIMU.
+5. Add hooks to FreeIMU visualizer which now has multiwii type plotting
