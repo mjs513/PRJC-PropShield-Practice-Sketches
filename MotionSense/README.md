@@ -23,6 +23,6 @@ The Calibration GUI is found in the NXPmotionsense/CalibrationGUI directory and 
 The source files that work with Python 2.7 are in the top level directory.  The standalone version (don't need python installed) is located in the dist folder of the directory.  Double click on the cal_gui.exe file and it will load and run on any windows machine.  I don't have a mac so i could not convert it.
 
 TODO:
-Add motion detection
-Add Tilt Compensation for the heading
-Add EEPROM support
+1. Add motion detection
+2. Add Tilt Compensation for the heading
+3. Add EEPROM support
