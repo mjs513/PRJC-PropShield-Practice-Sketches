@@ -26,3 +26,4 @@ TODO:
 1. Add motion detection
 2. Add Tilt Compensation for the heading
 3. Add EEPROM support
+4. Add/modify filter parameters and check filters to match FreeIMU.
