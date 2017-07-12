@@ -17,3 +17,12 @@ NEW FUNCTIONS:
 9.	setFileCal() - if this is called from the setup it will automatically load the calibration data from the calibration GUI.
 
 CALIBRATION GUI
+
+The Calibration GUI is found in the NXPmotionsense/CalibrationGUI directory and can be downloaded to any where on you machine.  It is based on the FreeIMU Calibration GUI with fixes.  How to use can be found at: https://github.com/mjs513/FreeIMU-Updates/wiki/04.-FreeIMU-Calibration and works in exactly the same way.  When you save the calibration.h file (this is a must, save to EEPROM has not been implemented in the library yet) you need to save it to the psIMU library folder on your machine.
+
+The source files that work with Python 2.7 are in the top level directory.  The standalone version (don't need python installed) is located in the dist folder of the directory.  Double click on the cal_gui.exe file and it will load and run on any windows machine.  I don't have a mac so i could not convert it.
+
+TODO:
+Add motion detection
+Add Tilt Compensation for the heading
+Add EEPROM support
