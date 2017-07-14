@@ -2,6 +2,13 @@
 #include "i2c_t3.h"  
 #include <SPI.h>
 #include <Arduino.h>
+#include <filter.h>
+
+//Setup Motion Detect Averages
+MovingAvarageFilter accnorm_avg(5);
+MovingAvarageFilter accnorm_test_avg(7);
+MovingAvarageFilter accnorm_var(7);	
+MovingAvarageFilter motion_detect_ma(7);
 
 psIMU::psIMU(){
 	// run builtin calibration
@@ -9,21 +16,17 @@ psIMU::psIMU(){
 	type = 0;
 }
 
-void psIMU::setCal(uint8_t range){
-	type = range;
-	if(type == 1){
-		#undef calBuiltin
-		#define calFile
-	}
-	
+void psIMU::setFileCal(){
+	#undef calBuiltin
 	#if defined(calBuiltin)
 	  cal_file = 0;
-	#elif defined(calFile)
+	#else
 	  cal_file = 1;
 	  // get values from global variables of same name defined in calibration.h
 	  #include "calibration.h"
 	#endif
 }
+
 void psIMU::setAccelFSR(uint8_t range){
 	accelFSR = range;
 }
@@ -150,6 +153,15 @@ void psIMU::getValues(float * values)
 		values[1] = ((float)accelCount[1]-accel_bias[1])/accel_scale[1];
 		values[2] = ((float)accelCount[2]-accel_bias[2])/accel_scale[2];  
 	  }
+
+	  if(readByte(FXAS21000_ADDRESS, FXAS21000_DR_STATUS) & 0x08)  // When this bit set, all axes have new data
+	  {
+		readGyroData(gyroCount);  // Read the x/y/z adc values
+		// Calculate the gyro value into actual degrees per second
+		values[3] = (float)gyroCount[0]*gRes - gBias[0];  // get actual gyro value, this depends on scale being set
+		values[4] = (float)gyroCount[1]*gRes - gBias[1];  
+		values[5] = (float)gyroCount[2]*gRes - gBias[2];  
+	  }
 	  
 	  if(readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_M_DR_STATUS) & 0x08)  // When this bit set, all mag axes have new data
 	  {
@@ -158,17 +170,9 @@ void psIMU::getValues(float * values)
 		values[7] = ((float)magCount[1]-mag_bias[1])/mag_scale[1];   
 		values[8] = ((float)magCount[2]-mag_bias[2])/mag_scale[2];  
 	  }
-	  delay(10);
+	  //delay(10);
 	}
 		
-	if(readByte(FXAS21000_ADDRESS, FXAS21000_DR_STATUS) & 0x08)  // When this bit set, all axes have new data
-	{
-		readGyroData(gyroCount);  // Read the x/y/z adc values
-		// Calculate the gyro value into actual degrees per second
-		values[3] = (float)gyroCount[0]*gRes - gBias[0];  // get actual gyro value, this depends on scale being set
-		values[4] = (float)gyroCount[1]*gRes - gBias[1];  
-		values[5] = (float)gyroCount[2]*gRes - gBias[2];  
-	}
   //Serial.print("Accel-cnt:"); Serial.print(accelCount[0]); Serial.print(", ");
   //Serial.print(accelCount[2]); Serial.print(", ");Serial.println(accelCount[2]); 
   //Serial.print("Gyro-cnt:"); Serial.print(gyroCount[0]); Serial.print(", ");
@@ -689,7 +693,103 @@ void psIMU::FXAS21000Active()
  writeByte(FXAS21000_ADDRESS, FXAS21000_CTRL_REG1, c |   0x02);   // Set bit 1 to 1, active mode; data acquisition enabled
 }
 
+void psIMU::MotionDetect(float * values) {
+	
+	float gyro[3];
+	float accnorm;
+	int accnorm_test, accnorm_var_test, omegax, omegay, omegaz, omega_test, motionDetect;
+	
+	gyro[0] = values[3] * PI/180;
+	gyro[1] = values[4] * PI/180;
+	gyro[2] = values[5] * PI/180;
+	
+    /*###################################################################
+    #
+    #   acceleration squared euclidean norm analysis
+	#   
+	#   some test values previously used:
+	#       if((accnorm >=0.96) && (accnorm <= 0.99)){
+	#										<= 0.995
+    #
+    ################################################################### */
+    accnorm = (values[0]*values[0]+values[1]*values[1]+values[2]*values[2]);
+    if((accnorm >=0.94) && (accnorm <= 1.03)){  
+        accnorm_test = 0;
+    } else {
+        accnorm_test = 1; }
+    
+	/** take average of 5 to 10 points  **/
+    float accnormavg = accnorm_avg.process(accnorm);
+    float accnormtestavg = accnorm_test_avg.process(accnorm_test);
 
+    /*####################################################################
+    #
+    #   squared norm analysis to determine suddenly changes signal
+    #
+    ##################################################################### */
+    //accnorm_var.process(sq(accnorm-accnorm_avg.getAvg()));
+	// was 0.0005
+    if(accnorm_var.process(sq(accnorm-accnormavg)) < 0.0005) {
+        accnorm_var_test = 0;
+    } else {
+        accnorm_var_test = 1; }
+
+    /*###################################################################
+    #
+    #   angular rate analysis in order to disregard linear acceleration
+    #
+	#   other test values used: 0, 0.00215, 0.00215
+    ################################################################### */
+    if ((gyro[0] >=-0.005) && (gyro[0] <= 0.005)) {
+        omegax = 0;
+    } else {
+        omegax = 1; }
+        
+    if((gyro[1] >= -0.005) && (gyro[1] <= 0.005)) {
+        omegay = 0;
+    } else {
+        omegay = 1; }
+        
+    if((gyro[2] >= -0.005) && (gyro[2] <= 0.005)) {
+        omegaz = 0;
+    } else {
+        omegaz = 1; }
+        
+    if ((omegax+omegay+omegaz) > 0) {
+        omega_test = 1;
+    } else {
+        omega_test = 0; }
+
+
+    /* 
+	###################################################################
+    #
+    # combined movement detector
+    #
+    #################################################################### 
+	*/
+    if ((accnormtestavg + omega_test + accnorm_var_test) > 0) {
+        motionDetect = 1;
+    } else {
+        motionDetect = 0; }
+
+    /* 
+	################################################################## 
+	*/   
+    
+    //motion_detect_ma.process(motionDetect);
+    
+    if(motion_detect_ma.process(motionDetect) > 0.5) {
+		values[11] = 1.0f;
+    } else {
+		values[11] = 0.0f;
+	}
+}
+
+
+//===================================================
+//MPL3115A2 Sensor Calls
+//===================================================
 void psIMU::MPL3115A2readAltitude() // Get altitude in meters and temperature in centigrade
 {
   uint8_t rawData[5];  // msb/csb/lsb pressure and msb/lsb temperature stored in five contiguous registers 

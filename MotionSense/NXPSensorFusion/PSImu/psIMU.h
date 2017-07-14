@@ -298,6 +298,7 @@ class psIMU
 		void initPS();
 		void getRawValues(int16_t * raw_values);
 		void getValues(float * values);
+		void MotionDetect(float * values);
 		void getBaro();
 		void getYawPitchRoll(float * ypr);
 		void getAres();
@@ -341,7 +342,7 @@ class psIMU
 		void setAccelODR(uint8_t range);
 		void setGyroFSR(uint8_t range);
 		void setGyroODR(uint8_t range);
-		void setCal(uint8_t range);
+		void setFileCal();
 		void setSeaPress(float sea_press_inp);
 		
 		// Specify FXAS21000 gyro settings
@@ -352,7 +353,7 @@ class psIMU
 		bool sleepMode = false;
 		
 		// Specify MPL3115 Altimeter settings
-		uint8_t SAMPLERATE = OS_130ms;
+		uint8_t SAMPLERATE = OS_34ms;
 		uint8_t ST_VALUE   = ATS_4s;
 		int AltimeterMode  = 0;        // use to choose between altimeter and barometer modes for FIFO data
 		float pressure, temperature, altitude, altimeter_setting_pressure_mb;
@@ -374,7 +375,12 @@ class psIMU
 		int16_t mag_max[3] = {-32767, -32767, -32767}, mag_min[3] = {32767, 32767, 32767}, mag_temp[3] = {0, 0, 0};
 		int32_t accel_bias[3] = {0, 0, 0}, accel_scale[3] = {0, 0, 0};
 		uint8_t type = 0;
+		
+		int instability_fix = 1;
+		
 		#define calBuiltin
+		
+		int zeroMotioncount = 0;
 		
 	private:
 		void writeByte(uint8_t address, uint8_t subAddress, uint8_t data);
