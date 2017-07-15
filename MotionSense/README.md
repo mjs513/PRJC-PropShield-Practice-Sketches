@@ -34,6 +34,9 @@ After you load the psIMU_serial.ino sketch into the Teensy it will automatically
 
 PROCESSING GUI's
 
+Two GUIs are provided for your use.
+1. The first is the Teensy Visualizer developed by Woozy.  I just modified for use with this library.  All functions are still the same.
+2. The second is the FreeIMU_cube_Odo_MulltwiiType GUI that I developed for use with the FreeIMU library.  On starting you have to be in the setup tab and you have three things you can do.  Set current sea level presures and write data to a file.  File name and contents have to modified from within the sketch.  After you hit start go to the FreeIMU tab.  There you will see a blank window for plotting various values from the GUI.  Click start to start plotting.  Deselect what is plotted by clicking on the colored box next to the variable name.
 
 TODO:
 1. Add EEPROM support
