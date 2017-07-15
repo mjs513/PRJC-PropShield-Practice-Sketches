@@ -12,7 +12,7 @@ NEW FUNCTIONS:
 4.  setAccelFSR - allows you to set the accelerometer full scale range (see the psIMU.h file for allowable settings)
 5.  setAccelSensitivity - sets the accelerometer sensitivity, 4096 for 2g, 2048 for 4g and 1024 for 8g
 6.  setAccelODR - sets accelerometer ODR (see psIMU.h for allowable settings)
-7.	setGyroFSR -  sets gyro Full Scale range
+7.	setGyroFSR -  sets gyro Full Scale Range
 8.  setGyroODR - sets gyro ODR
 9.	setFileCal() - if this is called from the setup it will automatically load the calibration data from the calibration GUI.
 
@@ -22,9 +22,19 @@ The Calibration GUI is found in the NXPmotionsense/CalibrationGUI directory and 
 
 The source files that work with Python 2.7 are in the top level directory.  The standalone version (don't need python installed) is located in the dist folder of the directory.  Double click on the cal_gui.exe file and it will load and run on any windows machine.  I don't have a mac so i could not convert it.
 
+HOW TO USE
+
+After you load the psIMU_serial.ino sketch into the Teensy it will automatically do a I2SCAN and check the sensor "who am i" registers.  If all is well it will continue on to the calibration function.  If you call the setFileCal() funPction it will only do the gryo calibration.  If do not it will enter the builtin function calibration for the prop shield as in Kris Winer's original sketch.  Either way the LED light will remain on during calibration and turn off when finished.  When the IMU has finished intialializing you will see the LED blink 10 times letting you know its ready to receive commands either from the serial monitor or from the processing sketches which we will talk about later.  The available commands are as follows:
+1. 'v' = prints out 
+2. 'r' = will print out about 20 records of raw values from the sensors including pressure and temperature
+3. 'C' = will print out current calibration values.
+4. 'y' = will continuously stream orientation values for yaw, pitch and roll until you enter another command in the serial command line, this is also used for the modified version of the teensy visualizer
+5. 'z' = will continuously stream encoder data for the FreeIMU_cube_Odo_MulltwiiType Processing
+6. 'b' = binary data used only by the calibration GUI.
+
+PROCESSING GUI's
+
+
 TODO:
-1. Add motion detection
-2. Add Tilt Compensation for the heading
-3. Add EEPROM support
-4. Add/modify filter parameters and check filters to match FreeIMU.
-5. Add hooks to FreeIMU visualizer which now has multiwii type plotting
+1. Add EEPROM support
+
