@@ -89,10 +89,10 @@ void MadgwickQuaternionUpdate(float ax, float ay, float az, float gx, float gy, 
 		s3 *= recipNorm;
 
 		// Apply feedback step
-		qDot1 -= beta * s0;
-		qDot2 -= beta * s1;
-		qDot3 -= beta * s2;
-		qDot4 -= beta * s3;
+		qDot1 -= betadef * s0;
+		qDot2 -= betadef * s1;
+		qDot3 -= betadef * s2;
+		qDot4 -= betadef * s3;
 	}
 
 	// Integrate rate of change of quaternion to yield quaternion
@@ -163,10 +163,10 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 		s3 *= recipNorm;
 
 		// Apply feedback step
-		qDot1 -= beta * s0;
-		qDot2 -= beta * s1;
-		qDot3 -= beta * s2;
-		qDot4 -= beta * s3;
+		qDot1 -= betadef * s0;
+		qDot2 -= betadef * s1;
+		qDot3 -= betadef * s2;
+		qDot4 -= betadef * s3;
 	}
 
 	// Integrate rate of change of quaternion to yield quaternion

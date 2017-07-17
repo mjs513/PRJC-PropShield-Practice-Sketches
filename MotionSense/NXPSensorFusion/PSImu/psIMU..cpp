@@ -66,8 +66,8 @@ void psIMU::calibMag(){
 
 void psIMU::initPS(){
     initFXOS8700CQ();            // Initialize the accelerometer and magnetometer if communication is OK
-    accelMotionIntFXOS8700CQ();  // Configure motion interrupts
-    sleepModeFXOS8700CQ();       // Configure sleep mode
+    //accelMotionIntFXOS8700CQ();  // Configure motion interrupts
+    //sleepModeFXOS8700CQ();       // Configure sleep mode
     //Serial.println("FXOS8700CQQ is online...");
     delay (1000);
 
@@ -457,11 +457,11 @@ void psIMU::initFXOS8700CQ()
     writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_M_CTRL_REG1, magOSR << 2 | 0x03); // Disable auto-calibration, set oversampling, enable hybrid mode 
     
     // Configure interrupts 1 and 2
-    writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3) & ~(0x02)); // clear bits 0, 1 
-    writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3) |  (0x02)); // select ACTIVE HIGH, push-pull interrupts    
-    writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4) & ~(0x1D)); // clear bits 0, 3, and 4
-    writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4) |  (0x1D)); // DRDY, Freefall/Motion, P/L and tap ints enabled  
-    writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG5, 0x01);  // DRDY on INT1, P/L and taps on INT2
+    //writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3) & ~(0x02)); // clear bits 0, 1 
+    //writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3) |  (0x02)); // select ACTIVE HIGH, push-pull interrupts    
+    //writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4) & ~(0x1D)); // clear bits 0, 3, and 4
+    //writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4) |  (0x1D)); // DRDY, Freefall/Motion, P/L and tap ints enabled  
+    //writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG5, 0x01);  // DRDY on INT1, P/L and taps on INT2
    
     FXOS8700CQActive();  // Set to active to start reading
 }

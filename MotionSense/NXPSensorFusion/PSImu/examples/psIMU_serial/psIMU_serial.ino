@@ -12,9 +12,10 @@
 psIMU myIMU = psIMU();
 iCompass maghead;
 
-// global constants for 9 DoF fusion and AHRS (Attitude and Heading Reference System)
-float GyroMeasError = M_PI * (30.0f / 180.0f);   // gyroscope measurement error in rads/s (start at 40 deg/s)
-float GyroMeasDrift = M_PI * (0.2f  / 180.0f);   // gyroscope measurement drift in rad/s/s (start at 0.0 deg/s/s)
+// global constants for 9 DoF fusion and AHRS (Attitude and Heading Reference System) fo the
+// Mahoney Gradient Descent Filter from the original paper
+float GyroMeasError = M_PI * (40.0f / 180.0f);   // gyroscope measurement error in rads/s (start at 40 deg/s)
+float GyroMeasDrift = M_PI * (0.0f  / 180.0f);   // gyroscope measurement drift in rad/s/s (start at 0.0 deg/s/s)
 
 // There is a tradeoff in the beta parameter between accuracy and response speed.
 // In the original Madgwick study, beta of 0.041 (corresponding to GyroMeasError of 2.7 degrees/s) was found to give optimal accuracy.
@@ -26,11 +27,14 @@ float GyroMeasDrift = M_PI * (0.2f  / 180.0f);   // gyroscope measurement drift 
 // In any case, this is the free parameter in the Madgwick filtering and fusion scheme.
 float beta = sqrtf(3.0f / 4.0f) * GyroMeasError;   // compute beta
 float zeta = sqrtf(3.0f / 4.0f) * GyroMeasDrift;   // compute zeta, the other free parameter in the Madgwick scheme usually set to a small or zero value
-#define twoKp 2.0f * 5.0f // these are the free parameters in the Mahony filter and fusion scheme, Kp for proportional feedback, Ki for integral
+
+// these are the free parameters in the Mahony filter and fusion scheme, Kp for proportional feedback, Ki for integral
+#define twoKp 2.0f * 5.0f
 #define twoKi 0.0f
 
-//Madgwick AHRS Gradient Descent 
-#define beta1 0.35        // algorithm gain
+// This is the free parameter for the Madgwick Quat Filter
+# define betadef 0.25f
+
 
 //Following lines defines Madgwicks Grad Descent Algorithm from his original paper
 // Global system variables
@@ -45,9 +49,6 @@ int16_t magCount[3], accelCount[3], gyroCount[3];  // Stores the 12-bit signed v
 int16_t raw_values[10];
 float ypr[3],  vals[13], value_array[20];
 float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};    // vector to hold quaternion
-//float ax, ay, az;       // Stores the real accel value in g's
-//float mx, my, mz;       // Stores the real mag value in G's
-//float gx, gy, gz;  // Stores the real accel value in g's
 float gyrotemperature, acceltemperature;
 float yaw, pitch, roll;
 float eInt[3] = {0.0f, 0.0f, 0.0f};       // vector to hold integral error for Mahony method
@@ -300,12 +301,12 @@ void loop() {
     // Then x is North, -y is East, and -z is Down for a NED convention
     // Pass gyro rate as rad/s
 
-    //MadgwickQuaternionUpdate(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
+    MadgwickQuaternionUpdate(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
     //MahonyQuaternionUpdate(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
-    MARGUpdateFilter(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
+    //MARGUpdateFilter(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
     
    uint32_t delt_t = millis() - count;
-   if (delt_t > 100) { // update LCD once per half-second independent of read rate
+   if (delt_t > 100) { // data output rate
     yaw   = atan2f(2.0f * (q[1] * q[2] + q[0] * q[3]), q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3]);   
     pitch = -asinf(2.0f * (q[1] * q[3] - q[0] * q[2]));
     roll  = atan2f(2.0f * (q[0] * q[1] + q[2] * q[3]), q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3]);
@@ -330,6 +331,7 @@ void loop() {
     sum = 0;
    }         
   }
+  //delay(4);
 }
 
 char serial_busy_wait() {
