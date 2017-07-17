@@ -462,7 +462,11 @@ void psIMU::initFXOS8700CQ()
     //writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4) & ~(0x1D)); // clear bits 0, 3, and 4
     //writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4) |  (0x1D)); // DRDY, Freefall/Motion, P/L and tap ints enabled  
     //writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG5, 0x01);  // DRDY on INT1, P/L and taps on INT2
-   
+
+     writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3, 0x00);          // Push-pull, active low interrupt 
+     writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4, 0x01);          // Enable DRDY interrupt 
+     writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG5, 0x01);          // DRDY interrupt routed to INT1 - 
+
     FXOS8700CQActive();  // Set to active to start reading
 }
 
