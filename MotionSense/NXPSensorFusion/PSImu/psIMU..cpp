@@ -2,13 +2,29 @@
 #include "i2c_t3.h"  
 #include <SPI.h>
 #include <Arduino.h>
-#include <filter.h>
+#include <Filter.h>
 
 //Setup Motion Detect Averages
 MovingAvarageFilter accnorm_avg(5);
 MovingAvarageFilter accnorm_test_avg(7);
 MovingAvarageFilter accnorm_var(7);	
 MovingAvarageFilter motion_detect_ma(7);
+
+//Setup accelerometer filter
+//butter50hz2_0 mfilter_accx;
+//butter50hz2_0 mfilter_accy;
+//butter50hz2_0 mfilter_accz;
+butter10hz0_3 mfilter_accx;
+butter10hz0_3 mfilter_accy;
+butter10hz0_3 mfilter_accz;
+
+//#if HAS_MPU9150() || HAS_MPU9250()
+//Set up Butterworth Filter for 9150 mag - more noisy than HMC5883L
+//was butter50hz2_0, new values base on Mario Cannistrà suggestion
+//he also used same filter on the gryo's which I am not using rigth now
+butter100hz2_0  mfilter_mx;
+butter100hz2_0  mfilter_my;
+butter100hz2_0  mfilter_mz;
 
 psIMU::psIMU(){
 	// run builtin calibration
@@ -149,14 +165,20 @@ void psIMU::getValues(float * values)
 	  if(readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_DR_STATUS) & 0x08)  // When this bit set, all accel axes have new data
 	  {
 		readAccelData(accelCount);       // Read the x/y/z adc values
-		values[0] = ((float)accelCount[0]-accel_bias[0])/accel_scale[0];
-		values[1] = ((float)accelCount[1]-accel_bias[1])/accel_scale[1];
-		values[2] = ((float)accelCount[2]-accel_bias[2])/accel_scale[2];  
+		int axcnt = mfilter_accx.filter((float) accelCount[0]);
+		int aycnt = mfilter_accy.filter((float) accelCount[1]);
+		int azcnt = mfilter_accz.filter((float) accelCount[2]);
+		
+		values[0] = ((float)axcnt-accel_bias[0])/accel_scale[0];
+		values[1] = ((float)aycnt-accel_bias[1])/accel_scale[1];
+		values[2] = ((float)azcnt-accel_bias[2])/accel_scale[2];  
 	  }
 
 	  if(readByte(FXAS21000_ADDRESS, FXAS21000_DR_STATUS) & 0x08)  // When this bit set, all axes have new data
 	  {
 		readGyroData(gyroCount);  // Read the x/y/z adc values
+		
+		
 		// Calculate the gyro value into actual degrees per second
 		values[3] = (float)gyroCount[0]*gRes - gBias[0];  // get actual gyro value, this depends on scale being set
 		values[4] = (float)gyroCount[1]*gRes - gBias[1];  
@@ -166,13 +188,17 @@ void psIMU::getValues(float * values)
 	  if(readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_M_DR_STATUS) & 0x08)  // When this bit set, all mag axes have new data
 	  {
 		readMagData(magCount);         // Read the x/y/z adc values
-		values[6] = ((float)magCount[0]-mag_bias[0])/mag_scale[0];  // get actual milliGauss value 
-		values[7] = ((float)magCount[1]-mag_bias[1])/mag_scale[1];   
-		values[8] = ((float)magCount[2]-mag_bias[2])/mag_scale[2];  
+		int mxcnt = mfilter_mx.filter((float) magCount[0]);
+		int mycnt = mfilter_my.filter((float) magCount[1]);
+		int mzcnt = mfilter_mz.filter((float) magCount[2]); 
+		
+		values[6] = ((float)mxcnt-mag_bias[0])/mag_scale[0];  // get actual milliGauss value 
+		values[7] = ((float)mycnt-mag_bias[1])/mag_scale[1];   
+		values[8] = ((float)mzcnt-mag_bias[2])/mag_scale[2];  
 	  }
 	  //delay(10);
 	}
-		
+	
   //Serial.print("Accel-cnt:"); Serial.print(accelCount[0]); Serial.print(", ");
   //Serial.print(accelCount[2]); Serial.print(", ");Serial.println(accelCount[2]); 
   //Serial.print("Gyro-cnt:"); Serial.print(gyroCount[0]); Serial.print(", ");
@@ -463,9 +489,9 @@ void psIMU::initFXOS8700CQ()
     //writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4, readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4) |  (0x1D)); // DRDY, Freefall/Motion, P/L and tap ints enabled  
     //writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG5, 0x01);  // DRDY on INT1, P/L and taps on INT2
 
-     writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3, 0x00);          // Push-pull, active low interrupt 
-     writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4, 0x01);          // Enable DRDY interrupt 
-     writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG5, 0x01);          // DRDY interrupt routed to INT1 - 
+    writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG3, 0x00);	// Push-pull, active low interrupt
+    writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG4, 0x01);	// Enable DRDY interrupt
+    writeByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_CTRL_REG5, 0x01);	// DRDY interrupt routed to INT1
 
     FXOS8700CQActive();  // Set to active to start reading
 }
@@ -717,7 +743,7 @@ void psIMU::MotionDetect(float * values) {
     #
     ################################################################### */
     accnorm = (values[0]*values[0]+values[1]*values[1]+values[2]*values[2]);
-    if((accnorm >=0.94) && (accnorm <= 1.03)){  
+    if((accnorm >=0.94) && (accnorm <= 1.04)){  
         accnorm_test = 0;
     } else {
         accnorm_test = 1; }
@@ -744,17 +770,17 @@ void psIMU::MotionDetect(float * values) {
     #
 	#   other test values used: 0, 0.00215, 0.00215
     ################################################################### */
-    if ((gyro[0] >=-0.005) && (gyro[0] <= 0.005)) {
+    if ((gyro[0] >=-0.015) && (gyro[0] <= 0.015)) {
         omegax = 0;
     } else {
         omegax = 1; }
         
-    if((gyro[1] >= -0.005) && (gyro[1] <= 0.005)) {
+    if((gyro[1] >= -0.015) && (gyro[1] <= 0.015)) {
         omegay = 0;
     } else {
         omegay = 1; }
         
-    if((gyro[2] >= -0.005) && (gyro[2] <= 0.005)) {
+    if((gyro[2] >= -0.015) && (gyro[2] <= 0.015)) {
         omegaz = 0;
     } else {
         omegaz = 1; }
@@ -763,7 +789,6 @@ void psIMU::MotionDetect(float * values) {
         omega_test = 1;
     } else {
         omega_test = 0; }
-
 
     /* 
 	###################################################################

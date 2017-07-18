@@ -7,7 +7,6 @@
 #include <psIMU.h>
 #include "CommunicationUtils.h"
 #include <iCompass.h>
-#include <filter.h>
 
 psIMU myIMU = psIMU();
 iCompass maghead;
@@ -120,7 +119,7 @@ void setup() {
   maghead = iCompass(0, 1, 0);
   myIMU.initPS();
   Serial.println(); Serial.println("Ready to receive commands");
-  for(int i; i < 10; i++){
+  for(int i = 0; i < 10; i++){
 	    digitalWrite(ledPin, HIGH);
       delay(250);
       digitalWrite(ledPin, LOW);
@@ -239,8 +238,8 @@ void loop() {
     // Pass gyro rate as rad/s
 
     //MadgwickQuaternionUpdate(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
-    //MahonyQuaternionUpdate(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
-    MARGUpdateFilter(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
+    MahonyQuaternionUpdate(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
+    //MARGUpdateFilter(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
     
     vals[9] = maghead.iheading(1, 0, 0, vals[0], vals[1], vals[2], vals[6], vals[7], vals[8]);
 
@@ -331,7 +330,7 @@ void loop() {
     sum = 0;
    }         
   }
-  //delay(4);
+  delay(5);
 }
 
 char serial_busy_wait() {
