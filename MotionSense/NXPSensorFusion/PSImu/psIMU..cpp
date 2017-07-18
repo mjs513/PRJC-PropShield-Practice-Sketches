@@ -91,13 +91,15 @@ void psIMU::initPS(){
     //Serial.println("FXAS21000Q is online...");
     delay (1000);
 
-    MPL3115A2Reset();                // Start off by resetting all registers to the default
-    initRealTimeMPL3115A2();         // initialize the altimeter for realtime data acquisition if communication is OK
-    MPL3115A2SampleRate(SAMPLERATE); // Set oversampling ratio
-    MPL3115A2enableEventflags();     // Set data ready enable
-    //Serial.println("MPL3115A2 event flags enabled...");
-    delay (1000);
-
+    #ifdef MPL3115
+		MPL3115A2Reset();                // Start off by resetting all registers to the default
+		initRealTimeMPL3115A2();         // initialize the altimeter for realtime data acquisition if communication is OK
+		MPL3115A2SampleRate(SAMPLERATE); // Set oversampling ratio
+		MPL3115A2enableEventflags();     // Set data ready enable
+		//Serial.println("MPL3115A2 event flags enabled...");
+		delay (1000);
+	#endif
+	
 	if(cal_file == 0){
 		aBias[0] = 2*readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_A_OFF_X);
 		aBias[1] = 2*readByte(FXOS8700CQ_ADDRESS, FXOS8700CQ_A_OFF_Y);
@@ -1142,12 +1144,18 @@ uint8_t psIMU::checkWAI(){
   Serial.print("FXOS8700CQ I am 0x"); Serial.print(c, HEX); Serial.println(" I should be 0xC7");
   byte d = readByte(FXAS21000_ADDRESS, FXAS21000_WHO_AM_I);  // Read gyro WHO_AM_I register
   Serial.print("FXOS8700CQ I am 0x"); Serial.print(d, HEX); Serial.println(" I should be 0xD7");
-  byte e = readByte(MPL3115A2_ADDRESS, MPL3115A2_WHO_AM_I);  // Read altimeter WHO_AM_I register
-  Serial.print("MPL3115A2  I am 0x"); Serial.print(e, HEX); Serial.println(" I should be 0xC4");
-
-  if (c == 0xC7 && d == 0xD7 && e == 0xC4) // WHO_AM_I should always be 0xC7, 0xD1, and 0xC4
-  {  
-	  return 1;
+  #ifdef MPL3115
+	byte e = readByte(MPL3115A2_ADDRESS, MPL3115A2_WHO_AM_I);  // Read altimeter WHO_AM_I register
+	Serial.print("MPL3115A2  I am 0x"); Serial.print(e, HEX); Serial.println(" I should be 0xC4");
+  #endif
+  
+  #ifdef MPL3115
+	if (c == 0xC7 && d == 0xD7 && e == 0xC4) // WHO_AM_I should always be 0xC7, 0xD1, and 0xC4
+  #else
+	if (c == 0xC7 && d == 0xD7 )
+  #endif
+  {	  
+	return 1;
   } else
   {
 	return 0 ; 

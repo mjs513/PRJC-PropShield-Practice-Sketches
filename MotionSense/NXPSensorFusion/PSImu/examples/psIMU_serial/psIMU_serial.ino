@@ -145,9 +145,11 @@ void readSerial(){
         myIMU.getRawValues(raw_values);
         sprintf(str, "%d,%d,%d,%d,%d,%d,%d,%d,%d,", raw_values[0], raw_values[1], raw_values[2], raw_values[3], raw_values[4], raw_values[5], raw_values[6], raw_values[7], raw_values[8]);
         Serial.print(str);
-        myIMU.getBaro();
-        Serial.print(myIMU.temperature); Serial.print(",");
-        Serial.print(myIMU.altimeter_setting_pressure_mb); Serial.print(",");
+        #ifdef MPL3115
+          myIMU.getBaro();
+          Serial.print(myIMU.temperature); Serial.print(",");
+          Serial.print(myIMU.altimeter_setting_pressure_mb); Serial.print(",");
+        #endif
         Serial.print(millis()); Serial.print(",");
         Serial.println("\r\n");
      }
@@ -264,12 +266,19 @@ void loop() {
     val_array[2] = q[2];
     val_array[3] = q[3];
     val_array[15] = 1./deltat;			//sampling frequency
-    myIMU.getBaro();
-    val_array[13] = myIMU.temperature;
-    val_array[14] = myIMU.altimeter_setting_pressure_mb;
-    val_array[16] = vals[9];			//heading
-    val_array[17] = myIMU.altitude;		//in meters
+    #ifdef MPL3115
+      myIMU.getBaro();
+      val_array[13] = myIMU.temperature;
+      val_array[14] = myIMU.altimeter_setting_pressure_mb;
+      val_array[17] = myIMU.altitude;		//in meters
+    #else
+      val_array[13] = 0.0;
+      val_array[14] = 0.0;
+      val_array[17] = 0.0;    //in meters
+    #endif
+    val_array[16] = vals[9];      //heading
     val_array[18] = vals[11];			////motion flag
+
     serialPrintFloatArr(val_array, 19);
     Serial.print('\n');
     
@@ -300,8 +309,8 @@ void loop() {
     // Then x is North, -y is East, and -z is Down for a NED convention
     // Pass gyro rate as rad/s
 
-    MadgwickQuaternionUpdate(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
-    //MahonyQuaternionUpdate(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
+    //MadgwickQuaternionUpdate(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
+    MahonyQuaternionUpdate(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
     //MARGUpdateFilter(-vals[0], vals[1], vals[2], vals[3]*PI/180.0f, -vals[4]*PI/180.0f, -vals[5]*PI/180.0f, vals[6], -vals[7], -vals[8]);
     
    uint32_t delt_t = millis() - count;

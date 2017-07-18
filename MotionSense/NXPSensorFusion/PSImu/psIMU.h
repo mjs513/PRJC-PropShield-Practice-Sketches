@@ -4,6 +4,8 @@
 #include <inttypes.h>
 #include <math.h>
 
+//uncomment for MPL3115 pressure sensor
+#define MPL3115
 
 // Define registers per FXOS8700CQ, Document Number: FXOS8700CQ 
 // http://cache.freescale.com/files/sensors/doc/data_sheet/FXOS8700CQ.pdf
