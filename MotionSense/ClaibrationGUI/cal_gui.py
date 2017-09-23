@@ -336,8 +336,8 @@ mag_bias[0] = %d;
 mag_bias[1] = %d;
 mag_bias[2] = %d;
 mag_scale[0] = %f;
-mag_scale[1] = %f;
-mag_scale[2] = %f;
+mag_scale[0] = %f;
+mag_scale[0] = %f;
 """
     calibration_h_text = text % (self.acc_offset[0], self.acc_offset[1], self.acc_offset[2], self.acc_scale[0], self.acc_scale[1], self.acc_scale[2], self.magn_offset[0], self.magn_offset[1], self.magn_offset[2], self.magn_scale[0], self.magn_scale[1], self.magn_scale[2])
     
